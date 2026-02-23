@@ -1,93 +1,48 @@
 import random
-
+def get_best_score():
+    try:
+        with open("record.txt", "r") as f:
+            return int(f.read())
+    except (FileNotFoundError, ValueError):
+        return float('inf')
+def save_best_score(score):
+    with open("record.txt", "w") as f:
+        f.write(str(score))
+print("Welcome to guess-number game!")
+best_score = get_best_score()
+if best_score != float('inf'):
+    print(f"Current high score: {best_score} attempts")
+else:
+    print("No high score yet. Be the first!")
 def choose_difficulty():
-    """Выбор уровня сложности"""
-    print("\nВыберите уровень сложности:")
-    print("1 - Легкий (1-50, 10 попыток)")
-    print("2 - Средний (1-100, 7 попыток)")
-    print("3 - Сложный (1-200, 5 попыток)")
-    
-    while True:
-        choice = input("Введите номер (1-3): ").strip()
-        if choice in ['1', '2', '3']:
-            return int(choice)
-        print(" Ошибка! Введите 1, 2 или 3")
-
-def get_difficulty_settings(level):
-    """Возвращает настройки для выбранного уровня"""
-    settings = {
-        1: {'min': 1, 'max': 50, 'attempts': 10, 'name': 'Лёгкий'},
-        2: {'min': 1, 'max': 100, 'attempts': 7, 'name': 'Средний'},
-        3: {'min': 1, 'max': 200, 'attempts': 5, 'name': 'Сложный'}
-    }
-    return settings[level]
-
-def get_number_input(min_num, max_num):
-    """Безопасный ввод числа с проверкой"""
     while True:
         try:
-            num = int(input(f"Введите число от {min_num} до {max_num}: "))
-            if min_num <= num <= max_num:
-                return num
-            print(f"❌ Число должно быть от {min_num} до {max_num}!")
+            choice = int(input("\nChoose difficulty: 1. Easy(10), 2. Medium(5), 3. Hard(3): "))
+            if choice == 1: return 10
+            if choice == 2: return 5
+            if choice == 3: return 3
+            print("Please enter 1, 2, or 3.")
         except ValueError:
-            print("❌ Ошибка! Введите целое число.")
+            print("Invalid input. Enter a number.")
+attempts_limit = choose_difficulty()
+secret_number = random.randint(1, 100)
+for i in range(attempts_limit):
+    current_attempt = i + 1
+    try:
+        guess = int(input(f"Attempt {current_attempt}/{attempts_limit}. Take a guess: "))
+    except ValueError:
+        print("Enter a valid number!")
+        continue
+    if guess == secret_number:
+        print(f" You guessed it! The number was {secret_number}.")
+        print(f" NEW HIGH SCORE! Previous was {best_score if best_score != float('inf') else 'none'}")
+        save_best_score(current_attempt)
+        break
+    elif guess < secret_number:
+        print("Too low!")
+    else:
+        print("Too high!")
+else:
+    print(f"Sorry, you're out of attempts. The number was {secret_number}")
 
-def play_game():
-    """Основная функция игры"""
-    print("=" * 40)
-    print(" ИГРА 'УГАДАЙ ЧИСЛО'")
-    print("=" * 40)
-    
-    while True:
-        start = input("\nНачать игру? (да/выход): ").strip().lower()
-        
-        if start == 'выход':
-            print("\nСпасибо за игру! До свидания! 👋")
-            break
-            
-        elif start == 'да':
-            # Выбор сложности
-            level = choose_difficulty()
-            settings = get_difficulty_settings(level)
-            
-            print(f"\n Уровень: {settings['name']}")
-            print(f" Диапазон: {settings['min']}-{settings['max']}")
-            print(f" Попыток: {settings['attempts']}")
-            
-            # Генерация числа
-            secret_number = random.randint(settings['min'], settings['max'])
-            attempts_left = settings['attempts']
-            
-            print(f"\nЯ загадал число! Попробуйте угадать!")
-            
-            # Основной игровой цикл
-            while attempts_left > 0:
-                print(f"\nОсталось попыток: {attempts_left}")
-                guess = get_number_input(settings['min'], settings['max'])
-                attempts_left -= 1
-                
-                if guess < secret_number:
-                    print(" Ваше число МЕНЬШЕ загаданного")
-                elif guess > secret_number:
-                    print(" Ваше число БОЛЬШЕ загаданного")
-                else:
-                    print("=" * 40)
-                    print(f" ПОБЕДА! Вы угадали число {secret_number}!")
-                    print(f" Использовано попыток: {settings['attempts'] - attempts_left}")
-                    print("=" * 40)
-                    break
-                    
-                if attempts_left == 0:
-                    print("=" * 40)
-                    print(f" Игра окончена! Вы исчерпали все попытки.")
-                    print(f" Загаданное число было: {secret_number}")
-                    print("=" * 40)
-                    break
-        else:
-            print(" Неверный ввод. Пожалуйста, введите 'да' или 'выход'.")
-
-# Запуск игры
-if __name__ == "__main__":
-    play_game()
 
